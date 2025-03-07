@@ -1,106 +1,119 @@
 # VirtualBox Auto Backup
 
-This project provides scripts to automatically back up your VirtualBox VM disk before launching VirtualBox. The system is designed to keep only the last two backups (by deleting the oldest one), so that you always have a recent backup without filling up your storage.
+Ce projet fournit des scripts pour sauvegarder automatiquement le disque de votre VM VirtualBox avant de lancer VirtualBox. Le système est conçu pour ne conserver que les deux dernières sauvegardes (en supprimant la plus ancienne), afin que vous ayez toujours une sauvegarde récente sans remplir votre espace de stockage.
 
-## Features
-- **Automatic backup before launching VirtualBox**
-- **Keeps only the last two backups** (the oldest backup is automatically removed)
-- **Customizable for any VirtualBox VM**
-- **Easy integration via a launcher script and alias**
+## Fonctionnalités
+- **Sauvegarde automatique avant le lancement de VirtualBox**
+- **Conserve uniquement les deux dernières sauvegardes** (la sauvegarde la plus ancienne est automatiquement supprimée)
+- **Personnalisable pour toute VM VirtualBox**
+- **Intégration facile via un script de lancement et un alias**
 
 ## Installation
 
-### 1. Clone the Repository
-Clone this repository into your local machine:
+### 1. Cloner le dépôt
+Clonez ce dépôt sur votre machine locale :
 ```sh
 git clone https://github.com/yourusername/vm-backup.git
 cd vm-backup
+```
 
-Configuration: What You Need to Modify
+### 2. Configuration : Ce que vous devez modifier
 
-Before using the scripts, you must modify two files to match your VirtualBox setup. A. Modify backup_vm.sh (Backup Configuration)
+Avant d'utiliser les scripts, vous devez modifier deux fichiers pour correspondre à votre configuration VirtualBox.
 
-This script creates a backup of your VM's disk.
+#### A. Modifier `backup_vm.sh` (Configuration de la sauvegarde)
 
-Open backup_vm.sh in your favorite editor:
+Ce script crée une sauvegarde du disque de votre VM.
 
+Ouvrez `backup_vm.sh` dans votre éditeur préféré :
+```sh
 nano backup_vm.sh
+```
 
-Modify the following lines (the ones in the Configuration section):
-
+Modifiez les lignes suivantes (dans la section Configuration) :
+```sh
 # Configuration - CHANGE THESE VALUES TO MATCH YOUR SETUP
-VM_NAME="Your-VM-Name"                 # Change to the name of your VirtualBox VM
-SOURCE="/path/to/your/vm.vdi"          # Change to the full path of your VM disk (the .vdi file)
-BACKUP_DIR="/path/to/your/backup/"     # Change to the directory where you want to store your backups
+VM_NAME="Your-VM-Name"                 # Changez pour le nom de votre VM VirtualBox
+SOURCE="/path/to/your/vm.vdi"          # Changez pour le chemin complet de votre disque VM (.vdi)
+BACKUP_DIR="/path/to/your/backup/"     # Changez pour le répertoire où vous souhaitez stocker vos sauvegardes
+```
 
-Example:
-
+Exemple :
+```sh
 VM_NAME="Ubuntu-VM"
 SOURCE="/media/user/VirtualBox VMs/Ubuntu-VM/Ubuntu-VM.vdi"
 BACKUP_DIR="/media/user/Backups/"
+```
 
-Save and exit (press CTRL + X, then Y, then Enter).
+Enregistrez et quittez (appuyez sur `CTRL + X`, puis `Y`, puis `Entrée`).
 
-B. Modify start_virtualbox.sh (Launcher Configuration)
+#### B. Modifier `start_virtualbox.sh` (Configuration du lanceur)
 
-This script runs the backup before launching VirtualBox.
+Ce script exécute la sauvegarde avant de lancer VirtualBox.
 
-Open start_virtualbox.sh:
-
+Ouvrez `start_virtualbox.sh` :
+```sh
 nano start_virtualbox.sh
+```
 
-Modify the following line to point to the correct location of backup_vm.sh:
-
+Modifiez la ligne suivante pour pointer vers l'emplacement correct de `backup_vm.sh` :
+```sh
 BACKUP_SCRIPT="/path/to/your/vm-backup/backup_vm.sh"
+```
 
-Example:
-
+Exemple :
+```sh
 BACKUP_SCRIPT="/home/user/vm-backup/backup_vm.sh"
+```
 
-Save and exit (press CTRL + X, then Y, then Enter).
+Enregistrez et quittez (appuyez sur `CTRL + X`, puis `Y`, puis `Entrée`).
 
-Final Steps
+### Étapes finales
 
-    Make the Scripts Executable
+#### 1. Rendre les scripts exécutables
 
-Run the following command to ensure the scripts have execution permissions:
-
+Exécutez la commande suivante pour vous assurer que les scripts ont les permissions d'exécution :
+```sh
 chmod +x backup_vm.sh start_virtualbox.sh
+```
 
-    Launch VirtualBox with Backup
+#### 2. Lancer VirtualBox avec sauvegarde
 
-Instead of launching VirtualBox normally, run the launcher script:
-
+Au lieu de lancer VirtualBox normalement, exécutez le script de lancement :
+```sh
 ./start_virtualbox.sh
+```
 
-This will:
+Cela va :
+1. Exécuter la sauvegarde (si votre VM n'est pas en cours d'exécution).
+2. Conserver uniquement les deux sauvegardes les plus récentes (en supprimant la plus ancienne si nécessaire).
+3. Lancer VirtualBox ensuite.
 
-    Execute the backup (if your VM is not running).
-    Keep only the two most recent backups (deleting the oldest one if necessary).
-    Launch VirtualBox afterwards.
+#### (Optionnel) Créer un alias pour un lancement facile
 
-    (Optional) Create an Alias for Easy Launching
+Pour remplacer la commande VirtualBox par défaut par votre lanceur de sauvegarde, ajoutez un alias à votre fichier de configuration de shell.
 
-To replace the default VirtualBox command with your backup launcher, add an alias to your shell configuration file.
-
-Open your shell configuration file (e.g., ~/.bashrc or ~/.zshrc):
-
+Ouvrez votre fichier de configuration de shell (par exemple, `~/.bashrc` ou `~/.zshrc`) :
+```sh
 nano ~/.zshrc
+```
 
-Add the following line at the end:
-
+Ajoutez la ligne suivante à la fin :
+```sh
 alias virtualbox="~/vm-backup/start_virtualbox.sh"
+```
 
-Save and exit, then source your configuration:
-
+Enregistrez et quittez, puis sourcez votre configuration :
+```sh
 source ~/.zshrc
+```
 
-Now, whenever you type virtualbox in the terminal, it will run your backup script first, then launch VirtualBox.
+Maintenant, chaque fois que vous tapez `virtualbox` dans le terminal, cela exécutera d'abord votre script de sauvegarde, puis lancera VirtualBox.
 
-How the Backup System Works
+## Comment fonctionne le système de sauvegarde
 
-    Backup Creation: Before launching VirtualBox, the backup_vm.sh script creates a new backup of your VM's .vdi file. The backup is saved in the directory specified by BACKUP_DIR with a numbered name (e.g., Ubuntu-VM-Backup-1.vdi, Ubuntu-VM-Backup-2.vdi).
+1. **Création de la sauvegarde** : Avant de lancer VirtualBox, le script `backup_vm.sh` crée une nouvelle sauvegarde du fichier .vdi de votre VM. La sauvegarde est enregistrée dans le répertoire spécifié par `BACKUP_DIR` avec un nom numéroté (par exemple, `Ubuntu-VM-Backup-1.vdi`, `Ubuntu-VM-Backup-2.vdi`).
 
-    Backup Retention: The script automatically checks the number of backups present. If there are already two backups, it deletes the oldest one before creating a new backup. This ensures that you always have the two most recent backups without using unnecessary disk space.
+2. **Rétention des sauvegardes** : Le script vérifie automatiquement le nombre de sauvegardes présentes. S'il y a déjà deux sauvegardes, il supprime la plus ancienne avant de créer une nouvelle sauvegarde. Cela garantit que vous avez toujours les deux sauvegardes les plus récentes sans utiliser d'espace disque inutile.
 
-    Backup Condition: The backup will only run if the VirtualBox VM is not currently running. This helps ensure the backup file is consistent and not corrupted by live disk changes.
+3. **Condition de sauvegarde** : La sauvegarde ne s'exécutera que si la VM VirtualBox n'est pas en cours d'exécution. Cela permet de s'assurer que le fichier de sauvegarde est cohérent et non corrompu par des modifications en direct du disque.
